@@ -4,10 +4,10 @@ An issue was discovered in secdrv.sys as shipped in Microsoft Windows Vista, Win
 
 The vulnerability was reported to Microsoft, and since it does not affect an up-to-date Windows machine (only version prior to KB3086255), they will not take any action. Was tested and exploited successfully on Windows 7 x86.
 
-Also related to [CVE-2018-7250](https://github.com/Elvin9/SecDrvPoolLeak).
+Also related to [CVE-2018-7250](https://github.com/alonhr/SecDrvPoolLeak).
 
 ### Screenshot
-![Alt text](https://github.com/Elvin9/NotSecDrv/raw/master/VirtualBox_Testing_NotSecDrv.png)
+![Alt text](https://github.com/alonhr/NotSecDrv/raw/master/VirtualBox_Testing_NotSecDrv.png)
 
 ### Details
 
@@ -22,7 +22,7 @@ and uses it to encrypt the user input buffer with some sort of a modified xor en
 * **0x98** frees a chunk that was allocated with 0x96. It finds the right chunk by searching the tag given to it in the allocation process.
 
 #### Info Leak (CVE-2018-7250)
-After IOCTL type 0x96 allocated a new chunk and initialized it, but not fully, it copies the chunk to usermode. 16 bits in the newly allocated chunk were not initialized, and contain data from previous PagedPool allocations. The uninitialized bits are then copies to usermode at .text:00011BE9 by the REP MOVSD instruction. PoC code [here](https://github.com/Elvin9/SecDrvPoolLeak).
+After IOCTL type 0x96 allocated a new chunk and initialized it, but not fully, it copies the chunk to usermode. 16 bits in the newly allocated chunk were not initialized, and contain data from previous PagedPool allocations. The uninitialized bits are then copies to usermode at .text:00011BE9 by the REP MOVSD instruction. PoC code [here](https://github.com/alonhr/SecDrvPoolLeak).
 
 #### Arbitrary Code Execution (CVE-2018-7249)
 When IOCTL type 0x97 is called, it finds the needed chunk, that was previously allocated with type 0x96, by its tag. If the allocation was already freed by IOCTL type 0x97, DeviceIoControl returns an error. The vulnerability here is, that the allocation used by type 0x97, can be freed DURING its operation (since no synchronization mechanisms are used) thus being used-after-freed if the race is won.
